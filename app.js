@@ -1,5 +1,5 @@
 const supabaseUrl = 'https://lhxgaoxpbheliwwihyuk.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxoeGdhb3hwYmhlbGl3d2loeXVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA0Njk2MDQsImV4cCI6MjA1NjA0NTYwNH0.c5CqmG33nlMKULw27py9jYqPcxTJyAXbBZixRXmeKbc';
+const supabaseKey = process.env.SUPABASE_KEY;
 const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
 // Free Tier Limits
