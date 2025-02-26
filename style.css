@@ -1,84 +1,84 @@
 :root {
-    --primary: #6366f1;
-    --secondary: #a855f7;
-    --background: #f8fafc;
-    --glass: rgba(255, 255, 255, 0.25);
-    --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  --primary: #6366f1;
+  --secondary: #a855f7;
+  --background: #f8fafc;
+  --glass: rgba(255, 255, 255, 0.25);
+  --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+}
+
+.dark-mode {
+  --background: #0f172a;
+  --glass: rgba(19, 28, 46, 0.7);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  background: var(--background);
+  min-height: 100vh;
+  transition: all 0.3s ease;
+}
+
+nav {
+  background: var(--glass) !important;
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.125) !important;
+}
+
+.note-card {
+  background: var(--glass);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.125);
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  cursor: pointer;
+}
+
+.note-card:hover {
+  transform: translateY(-10px) rotateX(5deg) rotateY(5deg) scale(1.02);
+  box-shadow: 0 25px 40px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.1);
+}
+
+.floating-add {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: linear-gradient(45deg, var(--primary), var(--secondary));
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  transition: all 0.3s ease;
+  z-index: 999;
+}
+
+@media (max-width: 600px) {
+  .nav-wrapper .brand-logo {
+    font-size: 1.2rem !important;
   }
   
-  .dark-mode {
-    --background: #0f172a;
-    --glass: rgba(19, 28, 46, 0.7);
-  }
-  
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Inter', sans-serif;
-  }
-  
-  body {
-    background: var(--background);
-    min-height: 100vh;
-    transition: all 0.3s ease;
-  }
-  
-  nav {
-    background: var(--glass) !important;
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.125) !important;
+  #mainContent .row .col {
+    padding: 0 !important;
   }
   
   .note-card {
-    background: var(--glass);
-    backdrop-filter: blur(10px);
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.125);
-    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-    transform-style: preserve-3d;
-    perspective: 1000px;
-    cursor: pointer;
-  }
-  
-  .note-card:hover {
-    transform: translateY(-10px) rotateX(5deg) rotateY(5deg) scale(1.02);
-    box-shadow: 0 25px 40px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.1);
+    margin: 10px 0;
   }
   
   .floating-add {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    background: linear-gradient(45deg, var(--primary), var(--secondary));
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-    transition: all 0.3s ease;
-    z-index: 999;
+    bottom: 1rem;
+    right: 1rem;
   }
-  
-  @media (max-width: 600px) {
-    .nav-wrapper .brand-logo {
-      font-size: 1.2rem !important;
-    }
-    
-    #mainContent .row .col {
-      padding: 0 !important;
-    }
-    
-    .note-card {
-      margin: 10px 0;
-    }
-    
-    .floating-add {
-      bottom: 1rem;
-      right: 1rem;
-    }
-  }
+}
