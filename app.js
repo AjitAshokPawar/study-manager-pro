@@ -1,9 +1,10 @@
-const supabaseUrl = 'https://lhxgaoxpbheliwwihyuk.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxoeGdhb3hwYmhlbGl3d2loeXVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA0Njk2MDQsImV4cCI6MjA1NjA0NTYwNH0.c5CqmG33nlMKULw27py9jYqPcxTJyAXbBZixRXmeKbc';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_KEY;
 const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
 // Free Tier Limits
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const allowedTypes = ['image/png', 'image/jpeg', 'application/pdf']; // Allowed file types
 
 // Check authentication state
 supabase.auth.onAuthStateChange((event, session) => {
@@ -20,12 +21,10 @@ document.getElementById('loginBtn')?.addEventListener('click', async () => {
   const password = document.getElementById('password').value;
 
   try {
-    const { user, error } = await supabase.auth.signIn({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (error) {
-      throw error;
-    }
-
+    if (error) throw error;
+    
     alert('Login successful!');
   } catch (error) {
     console.error('Login error:', error.message);
@@ -39,13 +38,11 @@ document.getElementById('signupBtn')?.addEventListener('click', async () => {
   const password = document.getElementById('password').value;
 
   try {
-    const { user, error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({ email, password });
 
-    if (error) {
-      throw error;
+    if (data.user) {
+      alert('Signup successful! Please check your email for confirmation.');
     }
-
-    alert('Signup successful! Please check your email for confirmation.');
   } catch (error) {
     console.error('Signup error:', error.message);
     alert('Signup failed. Please try again.');
@@ -57,9 +54,7 @@ document.getElementById('logoutBtn')?.addEventListener('click', async () => {
   try {
     const { error } = await supabase.auth.signOut();
 
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
 
     alert('Logout successful!');
     window.location.href = 'login.html';
@@ -103,133 +98,47 @@ async function loadDashboard() {
     </div>
   `;
 
-  // Load notes
   loadNotes();
-
-  // Load files
   loadFiles();
 
-  // Note form submission
   document.getElementById('noteForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const title = document.getElementById('noteTitle').value;
     const content = document.getElementById('noteContent').value;
 
-    try {
-      const { data, error } = await supabase
-        .from('notes')
-        .insert([{ user_id: supabase.auth.user().id, title, content }]);
+    const { data: user } = await supabase.auth.getUser(); // Fix for user retrieval
 
-      if (error) {
-        throw error;
-      }
+    try {
+      const { data, error } = await supabase.from('notes').insert([{ user_id: user.id, title, content }]);
+      if (error) throw error;
 
       alert('Note saved successfully!');
-      loadNotes(); // Refresh notes list
+      loadNotes();
     } catch (error) {
       console.error('Error saving note:', error.message);
-      alert('Failed to save note. Please try again.');
+      alert('Failed to save note.');
     }
   });
 
-  // File upload
   document.getElementById('fileUpload').addEventListener('change', async (e) => {
     const file = e.target.files[0];
-    if (file.size > MAX_FILE_SIZE) {
-      alert('File size exceeds 5MB limit');
+    if (file.size > MAX_FILE_SIZE || !allowedTypes.includes(file.type)) {
+      alert('Invalid file type or size.');
       return;
     }
 
+    const { data: user } = await supabase.auth.getUser();
+    
     try {
-      const { data, error } = await supabase
-        .storage
-        .from('files')
-        .upload(`users/${supabase.auth.user().id}/${file.name}`, file);
-
-      if (error) {
-        throw error;
-      }
+      const { data, error } = await supabase.storage.from('files').upload(`users/${user.id}/${file.name}`, file);
+      if (error) throw error;
 
       alert('File uploaded successfully!');
-      loadFiles(); // Refresh files list
+      loadFiles();
     } catch (error) {
       console.error('Error uploading file:', error.message);
-      alert('Failed to upload file. Please try again.');
+      alert('Failed to upload file.');
     }
   });
-}
-
-// Load notes
-async function loadNotes() {
-  try {
-    const { data, error } = await supabase
-      .from('notes')
-      .select('*')
-      .eq('user_id', supabase.auth.user().id);
-
-    if (error) {
-      throw error;
-    }
-
-    const notesContainer = document.getElementById('notesContainer');
-    notesContainer.innerHTML = data.map(note => `
-      <div class="col s12 m6">
-        <div class="card note-card">
-          <div class="card-content">
-            <span class="card-title">${note.title}</span>
-            <p>${note.content}</p>
-          </div>
-        </div>
-      </div>
-    `).join('');
-  } catch (error) {
-    console.error('Error loading notes:', error.message);
-    alert('Failed to load notes. Please try again.');
-  }
-}
-
-// Load files
-async function loadFiles() {
-  try {
-    const { data, error } = await supabase
-      .storage
-      .from('files')
-      .list(`users/${supabase.auth.user().id}/`);
-
-    if (error) {
-      throw error;
-    }
-
-    const filesList = document.getElementById('filesList');
-    filesList.innerHTML = data.map(file => `
-      <div class="file-item">
-        <span>${file.name}</span>
-        <button class="btn red btn-micro" onclick="deleteFile('${file.name}')">Delete</button>
-      </div>
-    `).join('');
-  } catch (error) {
-    console.error('Error loading files:', error.message);
-    alert('Failed to load files. Please try again.');
-  }
-}
-
-// Delete file
-async function deleteFile(fileName) {
-  try {
-    const { data, error } = await supabase
-      .storage
-      .from('files')
-      .remove([`users/${supabase.auth.user().id}/${fileName}`]);
-
-    if (error) {
-      throw error;
-    }
-
-    alert('File deleted successfully!');
-    loadFiles(); // Refresh files list
-  } catch (error) {
-    console.error('Error deleting file:', error.message);
-    alert('Failed to delete file. Please try again.');
-  }
 }
